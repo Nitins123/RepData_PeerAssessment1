@@ -11,7 +11,8 @@ output:
 ## Loading and preprocessing the data
 
 1. Load Dependencies
-```{r echo=TRUE}
+
+```r
 library(stringr)
 library(lubridate)
 library(ggplot2)
@@ -19,13 +20,15 @@ library(scales)
 ```
 
 2. Load Data
-```{r echo=TRUE}
+
+```r
 unzip("activity.zip")
 activityData <- read.csv('activity.csv')
 ```
 
 3. Transform data
-```{r echo=TRUE}
+
+```r
 activityData$datetime <- ymd_hm(paste(activityData$date,
                                       str_pad(activityData$interval, 4, 
                                               pad = "0")))
@@ -35,7 +38,8 @@ activityData$datetime <- ymd_hm(paste(activityData$date,
 ## What is mean total number of steps taken per day?
 
 1. Calculate the total number of steps taken per day
-```{r echo=TRUE}
+
+```r
 dailyActivity <- aggregate(steps ~ date, activityData, FUN = sum)
 ```
 
@@ -43,7 +47,8 @@ dailyActivity <- aggregate(steps ~ date, activityData, FUN = sum)
 research the difference between them. Make a histogram of the total number of 
 steps taken each day
 
-```{r echo=TRUE}
+
+```r
 ggplot(data=dailyActivity, aes(x = steps)) + 
   geom_histogram(col="blue", fill='lightblue', binwidth=1000) + 
   labs(title="Distribution of total steps taken per day") +
@@ -51,16 +56,28 @@ ggplot(data=dailyActivity, aes(x = steps)) +
   xlim(c(0,23000))
 ```
 
+![plot of chunk unnamed-chunk-5](figure/plot-unnamed-chunk-5-1.png) 
+
 3. Calculate and report the mean and median of the total number of steps taken 
 per day
 
 Mean
-```{r echo=TRUE}
+
+```r
 mean(dailyActivity$steps)
 ```
+
+```
+## [1] 10766.19
+```
 Median
-```{r echo=TRUE}
+
+```r
 median(dailyActivity$steps)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -70,7 +87,8 @@ median(dailyActivity$steps)
 and the average number of steps taken, averaged across all days (y-axis)
 
 Calculate average per interval
-```{r echo=TRUE}
+
+```r
 intervalMeanActivity <- aggregate(steps ~ interval, activityData, FUN = mean)
 intervalMeanActivity$time <- as.POSIXct(
   str_pad(intervalMeanActivity$interval, 4, pad = "0"), 
@@ -85,12 +103,19 @@ ggplot(intervalMeanActivity, aes(x = time, y = steps)) +
   labs(x="Time of day", y="Avgerage steps")
 ```
 
+![plot of chunk unnamed-chunk-8](figure/plot-unnamed-chunk-8-1.png) 
+
 2. Which 5-minute interval, on average across all the days in the dataset, 
 contains the maximum number of steps?
 
 Maximum average step interval
-```{r echo=TRUE}
+
+```r
 intervalMeanActivity[which.max(intervalMeanActivity$steps),]$interval
+```
+
+```
+## [1] 835
 ```
 
 
@@ -102,8 +127,13 @@ calculations or summaries of the data.
 
 1. Calculate and report the total number of missing values in the dataset (i.e.
 the total number of rows with NAs)
-```{r echo=TRUE}
+
+```r
 sum(is.na(activityData$steps))
+```
+
+```
+## [1] 2304
 ```
 
 2. Devise a strategy for filling in all of the missing values in the dataset. 
@@ -111,13 +141,15 @@ The strategy does not need to be sophisticated. For example, you could use the
 mean/median for that day, or the mean for that 5-minute interval, etc.
 
 My strategy is to replace missing values with the mean value of all intervals
-```{r echo=TRUE}
+
+```r
 meanIntervalValue = mean(intervalMeanActivity$steps)
 ```
 
 3. Create a new dataset that is equal to the original dataset but with the 
 missing data filled in.
-```{r echo=TRUE}
+
+```r
 activityDataWithImputation <- activityData
 activityDataWithImputation[which(
   is.na(activityDataWithImputation$steps)),]$steps = meanIntervalValue
@@ -128,26 +160,40 @@ and report the mean and median total number of steps taken per day. Do these
 values differ from the estimates from the first part of the assignment? What is 
 the impact of imputing missing data on the estimates of the total daily number
 of steps?
-```{r echo=TRUE}
+
+```r
   dailyActivityWithImputation <- aggregate(steps ~ date, 
                                            activityDataWithImputation, 
                                            FUN = sum)
 ```
 Histogram
-```{r echo=TRUE}
+
+```r
 ggplot(data=dailyActivityWithImputation, aes(x = steps)) + 
   geom_histogram(col="blue", fill='lightblue', binwidth=1000) + 
   labs(title="Distribution of total steps taken per day With Imputed values") +
   labs(x="Total steps taken per day with imputed values", y="Frequncy") + 
   xlim(c(0,23000))
 ```
+
+![plot of chunk unnamed-chunk-14](figure/plot-unnamed-chunk-14-1.png) 
 Mean
-```{r echo=TRUE}
+
+```r
 mean(dailyActivityWithImputation$steps)
 ```
+
+```
+## [1] 10766.19
+```
 Median
-```{r echo=TRUE}
+
+```r
 median(dailyActivityWithImputation$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 The mean of 10766.19 didn't change at all from before the missing data 
@@ -161,7 +207,8 @@ dataset with the filled-in missing values for this part.
 
 1. Create a new factor variable in the dataset with two levels – “weekday” and
 “weekend” indicating whether a given date is a weekday or weekend day.
-```{r echo=TRUE}
+
+```r
 activityData$typeOfDay <- factor(ifelse(wday(activityData$date) %in% c(1,7), 
 'weekend', 'weekday'))
 ```
@@ -172,7 +219,8 @@ across all weekday days or weekend days (y-axis). See the README file in the
 GitHub repository to see an example of what this plot should look like using
 simulated data.
 
-```{r echo=TRUE}
+
+```r
 intervalDayTypeMeanActivity <- aggregate(steps ~ interval + typeOfDay, 
                                          activityData, 
                                          FUN = mean)
@@ -189,3 +237,5 @@ ggplot(intervalDayTypeMeanActivity, aes(x = time, y = steps)) +
   labs(title="Average steps taken during a day") +
   labs(x="Time of day", y="Avgerage steps")
 ```
+
+![plot of chunk unnamed-chunk-18](figure/plot-unnamed-chunk-18-1.png) 
